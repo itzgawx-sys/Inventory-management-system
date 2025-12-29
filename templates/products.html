@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Product List</h1>
+
+<div class="search-container" style="margin-bottom: 20px;">
+    <input type="text" id="prodSearch" onkeyup="filterProducts()" placeholder="🔍 Search products by name..." style="width:100%; padding:12px; border-radius:8px; background:rgba(255,255,255,0.1); color:white; border:1px solid #444;">
+</div>
+
+<div class="glass-panel" style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Location 📍</th> <th>Stock Quantity</th> 
+                <th>Price</th>
+                {% if session.role == 'admin' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td><strong>{{ p.name }}</strong></td>
+                
+                <td style="color: #fbbf24;">
+                    {{ p.location if p.location else 'Not Assigned' }}
+                </td>
+
+                <td>
+                    {{ p.quantity }} 
+                    <span style="font-size: 0.8em; opacity: 0.7;">{{ p.unit }}</span>
+                    {% if p.quantity < 5 %}
+                        <span class="low-stock" style="color: #ff4d4d; font-size: 10px; border: 1px solid #ff4d4d; padding: 2px 5px; border-radius: 4px; margin-left: 5px;">LOW</span>
+                    {% endif %}
+                </td>
+                <td>₹{{ p.price }}</td>
+                
+                {% if session.role == 'admin' %}
+                <td>
+                    <a href="/edit/{{ p.id }}" class="btn-edit" style="color: var(--brand); text-decoration: none; font-weight: bold;">Edit</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function filterProducts() {
+    let input = document.getElementById('prodSearch').value.toLowerCase();
+    let rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        // Cells[1] is Name. Note: If you add columns before Name, change this index.
+        let name = row.cells[1].innerText.toLowerCase(); 
+        row.style.display = name.includes(input) ? '' : 'none';
+    });
+}
+</script>
+
+{% endblock %}

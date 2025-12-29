@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Dashboard</h1>
+
+<div class="dashboard-cards">
+
+<a href="/products" style="text-decoration: none; color: inherit;">
+    <div class="card">
+        <h3>Total Products</h3>
+        <p>{{ total_products }}</p>
+    </div>
+</a>
+
+<a href="/products" style="text-decoration: none; color: inherit;">
+    <div class="card">
+        <h3>Total Stock</h3>
+        <p>{{ total_stock }}</p>
+    </div>
+</a>
+
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <p>₹{{ total_revenue }}</p>
+    </div>
+
+    <div class="card warning">
+        <h3>Low Stock Items</h3>
+        <p>{{ low_stock }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Today's Sales</h3>
+        <p>₹{{ today_sales }}</p>
+    </div>
+
+
+</div>
+
+{% endblock %}

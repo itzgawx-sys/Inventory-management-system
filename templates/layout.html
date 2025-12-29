@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Pro</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-area">
+            <h2 style="color:var(--brand); text-shadow: 0 0 10px var(--brand);">INV PRO</h2>
+            <p>SYSTEM v1.0</p>
+        </div>
+
+        <div class="menu">
+            <a href="/dashboard"><span>🏠</span> Dashboard</a>
+            
+            {% if session.role == 'admin' %}
+                <a href="/profile"><span>⚙️</span> Store Profile</a>
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 15px;"></div>
+                <a href="/add"><span>➕</span> Add Product</a>
+                <a href="/manage_users"><span>👤</span> User Monitor</a> 
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 15px;"></div>
+            {% endif %}
+
+            <a href="/products"><span>📦</span> Products</a>
+            <a href="/sales"><span>💰</span> Sales</a>
+            <a href="/charts"><span>📊</span> Analytics</a>
+            <a href="/billing"><span>🧾</span> Billing</a>
+        </div>
+
+        <div class="logout-container">
+            <a href="/logout" class="logout-btn" style="color: #ff4d4d; border: 1px solid #ff4d4d;"><span>🚪</span> Logout</a>
+        </div>
+    </div>
+
+    <div class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

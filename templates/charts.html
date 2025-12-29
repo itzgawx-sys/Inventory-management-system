@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Analytics Dashboard</h1>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+    
+    <div class="glass-panel" style="padding: 20px; border-radius: 20px;">
+        <h3 style="color: #22d3ee; margin-bottom: 20px;">📦 Stock Levels</h3>
+        <canvas id="stockChart"></canvas>
+    </div>
+
+    <div class="glass-panel" style="padding: 20px; border-radius: 20px;">
+        <h3 style="color: #22d3ee; margin-bottom: 20px;">🔥 Top Selling Items</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- Chart 1: Stock Levels (Bar Chart) ---
+    const ctx1 = document.getElementById('stockChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: {{ p_names | tojson }},
+            datasets: [{
+                label: 'Quantity Available',
+                data: {{ p_qty | tojson }},
+                backgroundColor: 'rgba(34, 211, 238, 0.5)', /* Brand Color Transparent */
+                borderColor: '#22d3ee',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: 'white' } } },
+            scales: {
+                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+            }
+        }
+    });
+
+    // --- Chart 2: Sales (Doughnut Chart) ---
+    const ctx2 = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: {{ s_names | tojson }},
+            datasets: [{
+                label: 'Items Sold',
+                data: {{ s_qty | tojson }},
+                backgroundColor: [
+                    'rgba(34, 211, 238, 0.8)',
+                    'rgba(6, 182, 212, 0.8)',
+                    'rgba(147, 51, 234, 0.8)', /* Purple Accent */
+                    'rgba(236, 72, 153, 0.8)', /* Pink Accent */
+                    'rgba(59, 130, 246, 0.8)'
+                ],
+                borderColor: '#020617',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: 'white' } } }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="billing-page">
+    <div class="bill-input-area glass-panel">
+        <h3>🧾 Billing Details</h3>
+        <hr>
+        
+        <div class="input-grid">
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" id="custName" placeholder="Enter Name" oninput="updateLiveBill()">
+            </div>
+            <div class="form-group">
+                <label>Customer Address</label>
+                <input type="text" id="custAddr" placeholder="City, State" oninput="updateLiveBill()">
+            </div>
+            <div class="form-group">
+                <label>Customer Contact</label>
+                <input type="text" id="custPhone" placeholder="Phone Number" oninput="updateLiveBill()">
+            </div>
+            <div class="form-group">
+                <label>Customer GSTIN (Optional)</label>
+                <input type="text" id="custGst" placeholder="GST Number" oninput="updateLiveBill()">
+            </div>
+        </div>
+
+        <hr>
+        <div class="product-adder">
+            <select id="prodSelect">
+                <option value="">-- Select Product --</option>
+                {% for p in products %}
+                <option value="{{p.id}}" data-name="{{p.name}}" data-price="{{p.price}}" data-unit="{{p.unit}}">
+                    {{p.name}} (₹{{p.price}} / {{p.unit}})
+                </option>
+                {% endfor %}
+            </select>
+            <input type="number" id="prodQty" value="1" min="1" style="width: 80px;">
+            <button onclick="addItem()" class="btn-primary">Add Item</button>
+        </div>
+    </div>
+
+    <div id="printableBill" class="bill-paper">
+        <div class="bill-row">
+            <div class="address-box">
+                <strong>FROM:</strong><br>
+                <span style="font-weight: bold; text-transform: uppercase;">{{ store.store_name if store else 'Your Store Name' }}</span><br>
+                {{ store.address if store else 'Update address in Profile' }}<br>
+                Phone: {{ store.phone if store }}<br>
+                <strong>GSTIN: {{ store.gstin if store }}</strong>
+            </div>
+            <div class="address-box text-right">
+                <strong>TO: (Customer Details)</strong><br>
+                <span id="billCustName">---</span><br>
+                <span id="billCustAddr">---</span><br>
+                Contact: <span id="billCustPhone">---</span><br>
+                GST: <span id="billCustGst">---</span>
+            </div>
+        </div>
+
+        <h2 class="text-center">TAX INVOICE</h2>
+        <p class="text-right">Date: <span id="curDate"></span></p>
+
+        <table class="tax-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th class="no-print">Action</th>
+                </tr>
+            </thead>
+            <tbody id="billItems">
+                </tbody>
+        </table>
+
+        <div class="calc-section">
+            <div class="calc-row"><span>Sub-Total:</span> <span id="subTotal">0.00</span></div>
+            <div class="calc-row"><span>CGST (9%):</span> <span id="cgst">0.00</span></div>
+            <div class="calc-row"><span>SGST (9%):</span> <span id="sgst">0.00</span></div>
+            <div class="calc-row total"><span>GRAND TOTAL:</span> <span id="grandTotal">0.00</span></div>
+        </div>
+
+        <div class="bill-footer-msg">
+            <p>Thank you for your business!</p>
+            <small>This is a computer generated invoice.</small>
+        </div>
+    </div>
+
+    <button onclick="saveAndPrint()" class="btn-primary print-btn-main">💾 Save & Print Bill</button>
+</div>
+
+<script>
+let cart = [];
+const GST_RATE = 0.09; 
+
+document.getElementById('curDate').innerText = new Date().toLocaleDateString();
+
+function updateLiveBill() {
+    document.getElementById('billCustName').innerText = document.getElementById('custName').value || '---';
+    document.getElementById('billCustAddr').innerText = document.getElementById('custAddr').value || '---';
+    document.getElementById('billCustPhone').innerText = document.getElementById('custPhone').value || '---';
+    document.getElementById('billCustGst').innerText = document.getElementById('custGst').value || '---';
+}
+
+function addItem() {
+    let sel = document.getElementById('prodSelect');
+    if(!sel.value) return;
+
+    let item = {
+        id: sel.value,
+        name: sel.options[sel.selectedIndex].getAttribute('data-name'),
+        price: parseFloat(sel.options[sel.selectedIndex].getAttribute('data-price')),
+        unit: sel.options[sel.selectedIndex].getAttribute('data-unit') || 'Pcs',
+        qty: parseInt(document.getElementById('prodQty').value)
+    };
+    item.total = item.price * item.qty;
+    cart.push(item);
+    renderBill();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    renderBill();
+}
+
+function renderBill() {
+    let html = "";
+    let sub = 0;
+    cart.forEach((item, i) => {
+        sub += item.total;
+        html += `<tr>
+            <td>${item.name}</td>
+            <td>${item.price.toFixed(2)}</td>
+            <td>${item.qty} <small>${item.unit}</small></td>
+            <td>${item.total.toFixed(2)}</td>
+            <td class="no-print"><button onclick="removeItem(${i})" style="background:none; border:none; color:red; cursor:pointer;">❌</button></td>
+        </tr>`;
+    });
+    
+    document.getElementById('billItems').innerHTML = html;
+    
+    let cgstVal = sub * GST_RATE;
+    let sgstVal = sub * GST_RATE;
+    let grand = sub + cgstVal + sgstVal;
+
+    document.getElementById('subTotal').innerText = sub.toFixed(2);
+    document.getElementById('cgst').innerText = cgstVal.toFixed(2);
+    document.getElementById('sgst').innerText = sgstVal.toFixed(2);
+    document.getElementById('grandTotal').innerText = grand.toFixed(2);
+}
+
+function saveAndPrint() {
+    if(cart.length === 0) return alert("Add items first!");
+    
+    fetch('/save_bill', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            customer: {
+                name: document.getElementById('custName').value,
+                addr: document.getElementById('custAddr').value
+            },
+            cart: cart
+        })
+    }).then(() => {
+        window.print();
+        location.reload();
+    });
+}
+</script>
+
+<style>
+.billing-page { display: flex; flex-direction: column; gap: 20px; color: white; }
+.input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
+.product-adder { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+.bill-paper { background: white; color: #333; padding: 40px; border-radius: 8px; font-family: sans-serif; }
+.bill-row { display: flex; justify-content: space-between; margin-bottom: 30px; }
+.address-box { line-height: 1.6; font-size: 14px; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.tax-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.tax-table th { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; }
+.tax-table td { border: 1px solid #ddd; padding: 10px; }
+.calc-section { margin-top: 20px; width: 250px; margin-left: auto; }
+.calc-row { display: flex; justify-content: space-between; padding: 5px 0; }
+.total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; margin-top: 10px; padding-top: 10px; }
+.print-btn-main { margin-top: 20px; padding: 15px; font-size: 18px; }
+
+@media print {
+    .sidebar, .bill-input-area, .print-btn-main, .no-print { display: none !important; }
+    .content { margin: 0 !important; padding: 0 !important; }
+    .bill-paper { box-shadow: none; border: none; width: 100%; }
+}
+</style>
+
+{% endblock %}

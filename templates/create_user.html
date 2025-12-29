@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Create User</h1>
+
+<form method="POST">
+    <label>Username</label>
+    <input name="username" required>
+
+    <label>Password</label>
+    <input type="password" name="password" required>
+
+    <br><br>
+    <button>Create User</button>
+</form>
+
+{% endblock %}

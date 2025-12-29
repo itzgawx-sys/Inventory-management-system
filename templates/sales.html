@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="sales-page">
+    <h1>💰 Sales History</h1>
+
+    <div class="glass-panel filter-container" style="padding: 20px; margin-bottom: 20px; border-radius: 15px;">
+        <div class="input-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            
+            <div class="form-group">
+                <label style="color:var(--brand); font-size: 12px;">SEARCH PRODUCT</label>
+                <input type="text" id="searchName" placeholder="Type product name..." onkeyup="filterSales()">
+            </div>
+
+            <div class="form-group">
+                <label style="color:var(--brand); font-size: 12px;">FROM DATE</label>
+                <input type="date" id="fromDate" onchange="filterSales()">
+            </div>
+
+            <div class="form-group">
+                <label style="color:var(--brand); font-size: 12px;">TO DATE</label>
+                <input type="date" id="toDate" onchange="filterSales()">
+            </div>
+
+            <div class="form-group">
+                <label style="color:var(--brand); font-size: 12px;">MIN AMOUNT (₹)</label>
+                <input type="number" id="minAmount" placeholder="0" oninput="filterSales()">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button onclick="resetFilters()" style="width: 100%; background: #ff4d4d; color: white;">RESET</button>
+            </div>
+
+        </div>
+    </div>
+
+    <table class="tax-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Qty</th>
+                <th>Total (₹)</th>
+                <th>Date & Time</th>
+                <th>Invoice</th>
+            </tr>
+        </thead>
+        <tbody id="salesBody">
+            {% for s in sales %}
+            <tr class="sales-row" 
+                data-name="{{ s.name.lower() }}" 
+                data-date="{{ s.date }}" 
+                data-total="{{ s.total }}">
+                <td>{{ s.id }}</td>
+                <td class="prod-name"><strong>{{ s.name }}</strong></td>
+                <td>{{ s.quantity }}</td>
+                <td class="total-val">₹{{ s.total }}</td>
+                <td class="date-val">{{ s.date }}</td>
+                <td><a href="/invoice/{{ s.id }}" class="badge" style="text-decoration: none;">PDF</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function filterSales() {
+    let search = document.getElementById('searchName').value.toLowerCase();
+    let fromDate = document.getElementById('fromDate').value;
+    let toDate = document.getElementById('toDate').value;
+    let minAmt = parseFloat(document.getElementById('minAmount').value) || 0;
+    
+    let rows = document.querySelectorAll('.sales-row');
+
+    rows.forEach(row => {
+        let name = row.getAttribute('data-name');
+        let total = parseFloat(row.getAttribute('data-total'));
+        let date = row.getAttribute('data-date').split(' ')[0]; 
+
+        let show = true;
+
+        if (search && !name.includes(search)) show = false;
+        if (fromDate && date < fromDate) show = false;
+        if (toDate && date > toDate) show = false;
+        if (total < minAmt) show = false;
+
+        row.style.display = show ? "" : "none";
+    });
+}
+
+function resetFilters() {
+    document.getElementById('searchName').value = "";
+    document.getElementById('fromDate').value = "";
+    document.getElementById('toDate').value = "";
+    document.getElementById('minAmount').value = "";
+    filterSales();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="content" style="margin-left:0;display:flex;justify-content:center;align-items:center;">
+    <form method="POST" style="width:350px;">
+        <h2>Sign Up</h2>
+
+        {% if error %}
+        <p style="color:red">{{ error }}</p>
+        {% endif %}
+
+        <input name="username" placeholder="Username" required><br><br>
+        <input type="password" name="password" placeholder="Password" required><br><br>
+
+        <select name="role">
+            <option value="admin">Admin</option>
+        </select><br><br>
+
+        <button>Register</button>
+        <p><a href="/">Already have account?</a></p>
+    </form>
+</div>
+
+</body>
+</html>

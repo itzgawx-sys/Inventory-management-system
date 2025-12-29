@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>👤 User Activity Monitor</h1>
+
+<div class="glass-panel" style="padding: 20px; border-radius: 20px;">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td style="font-weight:bold; color:white;">{{ u.username }}</td>
+                <td>
+                    <span style="padding: 4px 10px; border-radius: 5px; background: {{ '#22d3ee' if u.role == 'admin' else '#94a3b8' }}; color: black; font-size: 12px; font-weight: bold;">
+                        {{ u.role.upper() }}
+                    </span>
+                </td>
+                <td style="color: #4ade80;">{{ u.last_login }}</td>
+                <td style="color: #f87171;">{{ u.last_logout }}</td>
+                <td>
+                    {% if u.last_login and (not u.last_logout or u.last_login > u.last_logout) %}
+                        <span style="color: #4ade80; font-weight: bold;">● Online</span>
+                    {% else %}
+                        <span style="color: #64748b;">○ Offline</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

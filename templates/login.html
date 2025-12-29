@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Inventory System</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Specific Styles for Login Page Only */
+        body.login-body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #020617;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Large Background Watermark Logo */
+        .bg-logo {
+            position: absolute;
+            width: 600px;
+            opacity: 0.05;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-box {
+            background: rgba(2, 6, 23, 0.85);
+            border: 1px solid #22d3ee;
+            padding: 40px;
+            border-radius: 15px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 1;
+        }
+
+        .login-box img {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .login-box h2 {
+            color: #22d3ee;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #22d3ee;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+            border: none;
+            color: black;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.5);
+        }
+        
+        .error { color: #ff4d4d; margin-bottom: 10px; font-size: 14px; }
+    </style>
+</head>
+<body class="login-body">
+
+    <img src="{{ url_for('static', filename='logo.png') }}" class="bg-logo">
+
+    <div class="login-box">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <h2>Inventory System</h2>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <select name="role" id="role" onchange="toggleFields()" required>
+                <option value="admin">Admin (Owner)</option>
+                <option value="user">User (Staff)</option>
+            </select>
+
+            <input type="text" name="admin_name" id="admin_name" placeholder="Admin Username" required>
+
+            <div id="user_field" style="display:none;">
+                <input type="text" name="user_name" placeholder="Staff Username">
+            </div>
+
+            <input type="password" name="password" placeholder="Password" required>
+
+            <button type="submit">LOGIN</button>
+        </form>
+        
+        <p style="margin-top:15px; font-size:12px; color:#888;">
+            <a href="/signup" style="color:#22d3ee; text-decoration:none;">New Admin? Sign Up</a>
+        </p>
+    </div>
+
+    <script>
+        function toggleFields() {
+            let role = document.getElementById("role").value;
+            let userDiv = document.getElementById("user_field");
+            let adminInput = document.getElementById("admin_name");
+
+            if (role === "user") {
+                userDiv.style.display = "block";
+                adminInput.placeholder = "Store Owner / Admin Name";
+            } else {
+                userDiv.style.display = "none";
+                adminInput.placeholder = "Admin Username";
+            }
+        }
+    </script>
+
+</body>
+</html>
